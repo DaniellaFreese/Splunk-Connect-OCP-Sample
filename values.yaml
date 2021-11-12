@@ -1,0 +1,102 @@
+global:
+  logLevel: info
+  kubernetes:
+    clusterName: <cluster-name> 
+splunk-kubernetes-logging:
+  splunk:
+    hec:
+      indexName: <index-name>
+      host:  <hostname>
+      token: <hec-token>
+      port: <port> 
+      protocol: https
+      insecureSSL: true
+  rbac:
+    create: true
+    openshiftPrivilegedSccBinding: true
+  serviceAccount:
+    create: true
+    name: splunk-connect
+  podSecurityPolicy:
+    create: true
+  kubernetes:
+    securityContext: true
+  containers:
+    logFormat: "%Y-%m-%dT%H:%M:%S.%N%:z"
+    logFormatType: cri
+  nodeSelector:
+    kubernetes.io/hostname: worker-1.ocp46.st46cluster
+  tolerations: {}
+  logs:
+    docker:
+      from:
+        journald:
+          unit: docker.service
+      timestampExtraction:
+        regexp: time="(?<time>\d{4}-\d{2}-\d{2}T[0-2]\d:[0-5]\d:[0-5]\d.\d{9}Z)"
+        format: "%Y-%m-%dT%H:%M:%S.%NZ"
+      sourcetype: kube:docker
+    kubelet: &glog
+      from:
+        journald:
+          unit: kubelet.service
+      timestampExtraction:
+        regexp: \w(?<time>[0-1]\d[0-3]\d [^\s]*)
+        format: "%m%d %H:%M:%S.%N"
+      multiline:
+        firstline: /^\w[0-1]\d[0-3]\d/
+      sourcetype: kube:kubelet
+    etcd:
+      from:
+        pod: etcd-server
+        container: etcd-container
+      timestampExtraction:
+        regexp: (?<time>\d{4}-\d{2}-\d{2} [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
+        format: "%Y-%m-%d %H:%M:%S.%N"
+    etcd-events:
+      from:
+        pod: etcd-server-events
+        container: etcd-container
+      timestampExtraction:
+        regexp: (?<time>\d{4}-[0-1]\d-[0-3]\d [0-2]\d:[0-5]\d:[0-5]\d\.\d{6})
+        format: "%Y-%m-%d %H:%M:%S.%N"
+    kube-apiserver:
+      <<: *glog
+      from:
+        pod: kube-apiserver
+      sourcetype: kube:kube-apiserver
+    kube-scheduler:
+      <<: *glog
+      from:
+        pod: kube-scheduler
+      sourcetype: kube:kube-scheduler
+    kube-controller-manager:
+      <<: *glog
+      from:
+        pod: kube-controller-manager
+      sourcetype: kube:kube-controller-manager
+    kube-audit:
+      from:
+        file:
+          path: /var/log/kube-apiserver-audit.log
+      timestampExtraction:
+        format: "%Y-%m-%dT%H:%M:%SZ"
+      sourcetype: kube:apiserver-audit
+    openshift-audit:
+      from:
+        file:
+          path: /var/log/openshift-apiserver/audit.log
+      timestampExtraction:
+        format: "%Y-%m-%dT%H:%M:%SZ"
+      sourcetype: kube:openshift-apiserver-audit
+    oauth-audit:
+      from:
+        file:
+          path: /var/log/oauth-apiserver/audit.log
+      timestampExtraction:
+        format: "%Y-%m-%dT%H:%M:%SZ"
+      sourcetype: kube:oauth-apiserver-audit
+splunk-kubernetes-objects:
+  enabled: false
+splunk-kubernetes-metrics:
+  enabled: false
