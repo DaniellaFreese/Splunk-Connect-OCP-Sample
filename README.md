@@ -7,8 +7,10 @@ These notes were built for splunk-connect release version: 1.4.10
 ### Pre-requisites
 The following pre-requisites are required: 
 
-Download Helm 3 executable
+Download Helm 3 
+  To Download Helm 3 from Openshift 4 Console 
    * Login to OCP >> Top Right corner >> ? >> Command Line Tools >> Download Helm 3
+   * 
 
 Download the Splunk Connect Helm Chart. 
    * Github Link: https://github.com/splunk/splunk-connect-for-kubernetes
