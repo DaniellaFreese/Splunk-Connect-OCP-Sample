@@ -41,6 +41,9 @@ Log into the openshift cluster
 
 Create a namespace to deploy splunk-connect application: `oc new-project splunk-connect`
 
-Run Helm install to deploy splunk-connect to the new namespace: `helm install splunk-connect splunk/splunk-connect-for-kubernetes -f values.yaml`
+Run Helm install to deploy splunk-connect to the new namespace: 
+* if running the chart from local repo: `helm install splunk-connect splunk/splunk-connect-for-kubernetes -f values.yaml`
+* if the chart has been downloaded: `helm install splunk-connect ./splunk-connect-for-kubernetes -f values.yaml`
+  
 
 
